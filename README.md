@@ -33,7 +33,7 @@ The key ideas are:
    * [Container](#container) 
    * [Images](#images)
    * [Registry](#registry)
-## What is a Container <a name="#container"></a>
+## What is a Container <a name="container"></a>
 The offical Docker <u>[resources](https://www.docker.com/resources/what-container)</u> state:
 > A container is an abstraction at the application layer that packages code and dependencies together. Instead of virtualizing the entire physical machine, containers virtualize the host operating system only.
 
@@ -62,11 +62,11 @@ These commands shows that docker uses the kernel of the host OS
         $ uname -a 
         $ docker run alpine uname -a
 
-## Waht is a Docker Image<a name="#images"></a>
+## Waht is a Docker Image <a name="images"></a>
 Images are multi-layered self-contained files that act as the template for creating containers.They are like a frozen, read-only copy of a container and can be exchanged through registries. The OCI (Open Container Initiative) defined a standard specification for images which is complied by the major containerization engines out there. a docker image can be used with another runtime like Podman without any additional hassle.
 Containers are just image in running states.
 
-## What is a Docker Registry
+## What is a Docker Registry <a name="registry"></a>
 A centralized place where you can upload your images and can also download images created by others. [Docker Hub](https://hub.docker.com/) is the default public registry for Docker and [Quay](https://quay.io/) is another popular registry by Red Hat.
 
 
