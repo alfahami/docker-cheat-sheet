@@ -1,4 +1,8 @@
 # Hands on Docker 
+An overview of docker and its functionalities.\
+A cheat sheet of its basic command\
+A yet minimal, simple to be complex guide on docker.
+Based on [The Docker Handbook](https://www.freecodecamp.org/news/the-docker-handbook/#introduction-to-containerization-and-docker "FreeCodeCamp")
 
 ## The idea behind containerization
 
@@ -29,7 +33,7 @@ The key ideas are:
    * [Container](#container) 
    * [Images](#images)
    * [Registry](#registry)
-## What is a Container<a name="#container"></a>
+## What is a Container <a name="#container"></a>
 The offical Docker <u>[resources](https://www.docker.com/resources/what-container)</u> state:
 > A container is an abstraction at the application layer that packages code and dependencies together. Instead of virtualizing the entire physical machine, containers virtualize the host operating system only.
 
