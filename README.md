@@ -1,5 +1,5 @@
 # Hands on Docker 
-___________________
+
 An overview of docker and its functionalities.\
 A cheat sheet of its common used commands\
 A yet minimal, simple to be complex guide on docker.
@@ -7,7 +7,7 @@ Based on [The Docker Handbook](https://www.freecodecamp.org/news/the-docker-hand
 
 
 ## The idea behind containerization
-------------------------------------
+
 
 According to IBM
 > Containuerization involves encapsulating or packaging software code and all its dependacies so that it can run uniformely and consistenly on any infrastructure
@@ -25,7 +25,6 @@ The key ideas are:
 
 
 # Very Firsts Commands
-----------------------
 
         $ docker run hello-world 
             + run the hello-world image
@@ -34,11 +33,13 @@ The key ideas are:
             + list all past and current running containers
   
 # Docker achitecture
+
    * [Container](#container) 
    * [Images](#images)
    * [Registry](#registry)
 ## What is a Container <a name="container"></a>
------------------------------------------------
+
+
 The offical Docker <u>[resources](https://www.docker.com/resources/what-container)</u> state:
 > A container is an abstraction at the application layer that packages code and dependencies together. Instead of virtualizing the entire physical machine, containers virtualize the host operating system only.
 
@@ -70,16 +71,16 @@ These commands shows that docker uses the kernel of the host OS
         $ docker run alpine uname -a
 
 ## Waht is a Docker Image <a name="images"></a>
--------------------------------------------------
+
 Images are multi-layered self-contained files that act as the template for creating containers.They are like a frozen, read-only copy of a container and can be exchanged through registries. The OCI (Open Container Initiative) defined a standard specification for images which is complied by the major containerization engines out there. a docker image can be used with another runtime like Podman without any additional hassle.
 Containers are just image in running states.
 
 ## What is a Docker Registry <a name="registry"></a>
---------------------------------
+
 A centralized place where you can upload your images and can also download images created by others. [Docker Hub](https://hub.docker.com/) is the default public registry for Docker and [Quay](https://quay.io/) is another popular registry by Red Hat.
 
 ## Docker Architecture Overview
--------------------------------
+
 Docker as a software was designing in consist of three major components:
   1. **Docker Daemon** : The daemon( <mark>dockerd</mark> is a process running in the background and awaits for commands from the client. 
   2. **Docker Client** : The client (</mark>docker</mark>) is a CLI program mostly responsible for transporting commands isued by users
