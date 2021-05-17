@@ -211,11 +211,15 @@ The command <code>container rm \<container ID or name></code> can be used in ord
 ```shell
 docker container rm busy_mashivara
 ```
-
-
-
-
-
+Note that multiple containers can be removed by passing their ID one after another separated by space.
+To remove all dangling container, we can use the command below:
+```shell
+docker container prune
+```
+The option <code>--rm</code> for the <code>docker container run</code> allows to indicated that our container should be removed once stopped or killed.
+```shell
+docker container run --rm --detach --publish 8383:80 --name hello-volatile fhsinchy/hello-dock
+```
    
            
 
