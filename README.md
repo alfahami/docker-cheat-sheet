@@ -1,4 +1,5 @@
 # Hands on Docker 
+___________________
 An overview of docker and its functionalities.\
 A cheat sheet of its common used commands\
 A yet minimal, simple to be complex guide on docker.
@@ -6,6 +7,7 @@ Based on [The Docker Handbook](https://www.freecodecamp.org/news/the-docker-hand
 
 
 ## The idea behind containerization
+------------------------------------
 
 According to IBM
 > Containuerization involves encapsulating or packaging software code and all its dependacies so that it can run uniformely and consistenly on any infrastructure
@@ -23,6 +25,7 @@ The key ideas are:
 
 
 # Very Firsts Commands
+----------------------
 
         $ docker run hello-world 
             + run the hello-world image
@@ -35,12 +38,14 @@ The key ideas are:
    * [Images](#images)
    * [Registry](#registry)
 ## What is a Container <a name="container"></a>
+-----------------------------------------------
 The offical Docker <u>[resources](https://www.docker.com/resources/what-container)</u> state:
 > A container is an abstraction at the application layer that packages code and dependencies together. Instead of virtualizing the entire physical machine, containers virtualize the host operating system only.
 
 Containers are completely isolated environments from the host system as well as from each other. They're a lot lighter than the traditional VM and a large number of containers can be run simultaneously without affecting the performance of the host system. Containers are considered to be the next generation of virtual machines.*
 
 ##### A little comparison between VM and Containers
+-----------------------------------------
 The main difference is the method of virtualization.
 
 
@@ -53,6 +58,7 @@ The main difference is the method of virtualization.
 | With it own OS, VM are heavier and more resources consuming | By eliminating the entire host OS, containers are much lighter and less ressource-hogging     |
 
 ##### Illustrations
+-------------------
 
 | Traditional VM| Containers |
 | -----------| ----------- |
@@ -64,13 +70,16 @@ These commands shows that docker uses the kernel of the host OS
         $ docker run alpine uname -a
 
 ## Waht is a Docker Image <a name="images"></a>
+-------------------------------------------------
 Images are multi-layered self-contained files that act as the template for creating containers.They are like a frozen, read-only copy of a container and can be exchanged through registries. The OCI (Open Container Initiative) defined a standard specification for images which is complied by the major containerization engines out there. a docker image can be used with another runtime like Podman without any additional hassle.
 Containers are just image in running states.
 
 ## What is a Docker Registry <a name="registry"></a>
+--------------------------------
 A centralized place where you can upload your images and can also download images created by others. [Docker Hub](https://hub.docker.com/) is the default public registry for Docker and [Quay](https://quay.io/) is another popular registry by Red Hat.
 
 ## Docker Architecture Overview
+-------------------------------
 Docker as a software was designing in consist of three major components:
   1. **Docker Daemon** : The daemon( <mark>dockerd</mark> is a process running in the background and awaits for commands from the client. 
   2. **Docker Client** : The client (</mark>docker</mark>) is a CLI program mostly responsible for transporting commands isued by users
@@ -81,6 +90,7 @@ Docker as a software was designing in consist of three major components:
    "Docker uses a client-server architecture. The Docker *client* communicates with the the Docker _daemon_ which does heavey lifting of building, running, and distributing your Docker containers."
 
    ### The big picutre
+   -------------------
    ![alt full process](images/docker-run-hello-world.svg)
 
    PS : if the the image is not found in the local repository <code>Unable to find image 'image-name'</code> will be printed on the terminal.
@@ -90,6 +100,7 @@ Docker as a software was designing in consist of three major components:
    In case of newer images, the Daemon will fetch them automatically.
 
    ### Basic manipulations 
+   -----------------------
    * <code>docker \<object> \<command> \<options> </code> command syntax\
              - \<object> : type of docker object to be manipulated\
              - \<command> task to be carried by the <mark>Daemon</mark>\
@@ -100,6 +111,7 @@ Docker as a software was designing in consist of three major components:
   
 
   ### Publish a port
+  ------------------
   As isolated environments as containers, the OS doesn't know nothing about what's going on inside them. Hence applications running inside them reamin inaccessible from the outside.
 
   To allow access from the outside, We must publish the appropriate port inside the container to a port on your local network. The common sysntax is <code>--publish or -p</code>
