@@ -190,6 +190,29 @@ docker container restart <container ID or name>
 The main difference between starting and restarting a container is that the <code>container restart</code> command attemps to stop the target container and start it back while the <code>start</code> command aims to start an already stopped command.
 In case of a stopped container, both commands are exactly the same. But in case of a running container, you must use the container restart command.
 
+### Creating a container without running
+-----------------------------------------
+```shell
+docker container run <container-image>
+```
+The command above used two differents commands which are:
+<code>docker container create</code> creates a container from a given name
+<code>docker container start</code> starts an already created container
+```shell
+docker container create --publish 8080:80 fhsinchy/hello-dock
+docker container start fhsinchy/hello-dock
+```
+The command above will create the hello-dock container.
+
+### Removing dangling containers
+--------------------------------
+Containers that have been stopped or or killed remain in the system. These dangling containers can take up spaces or create conflict with newer containers.
+The command <code>container rm \<container ID or name></code> can be used in order to remove a stopped container.
+```shell
+docker container rm busy_mashivara
+```
+
+
 
 
 
