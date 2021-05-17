@@ -91,11 +91,11 @@ Docker as a software was designing in consist of three major components:
 
    ### Basic manipulations 
    * <code>docker \<object> \<command> \<options> </code> command syntax
-         * \<object> : type of docker object to be manipulated
-         * \<command> task to be carried by the <mark>Daemon<</mark>
+         * \<object> : type of docker object to be manipulated\
+         * \<command> task to be carried by the <mark>Daemon</mark>\
          * \<options> : any valid parameter that can override the default behaviour of the command.
-  * <code>docker run \<image name> </code> or <code>docker container run \<image name></code>: run a container
-  * the \<option> <code>--publish or -p</code> is for port mapping
+  * <code>docker run \<image name> </code> or <code>docker container run \<image name></code>: run a container\
+  * the \<option> <code>--publish or -p</code> is for port mapping\
   * <code>Ctrl +C </code> : stop the container
   
 
