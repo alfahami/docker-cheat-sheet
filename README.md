@@ -107,6 +107,7 @@ Docker as a software was designing in consist of three major components:
   <code>docker run container --publish 8080:80 /repo/docker-image</code> : publish the image /repo/docker-image to the port 8080 locally.
 
 ### Running a container in the background
+-----------------------------------------
 Known as the **detach mode**, this mode keeps running the container int he background. The option to be used is <code>--detach or -d</code>
 Note that this command output the full _CONTAINER ID_ of the newely created container on the terminal
 <code>docker run container --detach --publish 808:80 /repo/docker-image</code>\
