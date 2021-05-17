@@ -1,8 +1,8 @@
 # Hands on Docker 
 An overview of docker and its functionalities.\
 A cheat sheet of its common used commands\
-A yet minimal, simple to be complex guide on docker.
-Based on [The Docker Handbook](https://www.freecodecamp.org/news/the-docker-handbook/#introduction-to-containerization-and-docker "FreeCodeCamp")
+A yet minimal, simple to be complex guide on doc
+
 
 ## The idea behind containerization
 
@@ -68,6 +68,60 @@ Containers are just image in running states.
 
 ## What is a Docker Registry <a name="registry"></a>
 A centralized place where you can upload your images and can also download images created by others. [Docker Hub](https://hub.docker.com/) is the default public registry for Docker and [Quay](https://quay.io/) is another popular registry by Red Hat.
+
+## Docker Architecture Overview
+Docker as a software was designing in consist of three major components:
+  1. **Docker Daemon** : The daemon( ==dockerd==) is a process running in the background and awaits for commands from the client. 
+  2. **Docker Client** : The client (==docker==) is a CLI program mostly responsible for transporting commands isued by users
+  3. **RESt API** : The rest API acts as a bridge between the daemon and the client. Any commands issued using the client passes through the API to finally reach the daemon.
+   
+   Docker officials state: 
+
+   "Docker uses a client-server architecture. The Docker *client* communicates with the the Docker _daemon_ which does heavey lifting of building, running, and distributing your Docker containers."
+
+   ### The big picutre
+   ![alt full process](images/docker-run-hello-world.svg)
+
+   PS : if the the image is not found in the local repository <code>Unable to find image 'image-name'</code> will be printed on the terminal.
+   The ==Daemon== will reach out to default public registry (Docker Hub) and pulls in the last copy of the image if found.
+   A new container will then be created from the fresly pulled image.
+   By default, Docker Daemon look for images in the hub that are not present locally and once an image has been fetched, it will stay in the local cache.
+   In case of newer images, the Daemon will fetch them automatically.
+
+   ### Basic manipulations 
+   * <code>docker \<object> \<command> \<options> </code> command syntax
+         * \<object> : type of docker object to be manipulated
+         * \<command> task to be carried by the ==Daemon==
+         * \<options> : any valid parameter that can override the default behaviour of the command.
+  * <code>docker run \<image name> </code> or <code>docker container run \<image name></code>: run a container
+  * the \<option> <code>--publish or -p</code> is for port mapping
+  * <code>Ctrl +C </code> : stop the container
+  
+
+  ### Publish a port
+  As isolated environments as containers, the OS doesn't know nothing about what's going on inside them. Hence applications running inside them reamin inaccessible from the outside.
+
+  To allow access from the outside, We must publish the appropriate port inside the container to a port on your local network. The common sysntax is <code>--publish or -p</code>
+  <code>--publish \<host port> \<container port></code>
+  <code>docker run container --publish 8080:80 /repo/docker-image</code> : publish the image /repo/docker-image to the port 8080 locally.
+
+### Running a container in the background
+Known as the **detach mode**, this mode keeps running the container int he background. The option to be used is <code>--detach or -d</code>
+Note that this command output the full _CONTAINER ID_ of the newely created container on the terminal
+<code>docker run container --detach --publish 808:80 /repo/docker-image</code>
+output: 9e634a231ea4e37f94ef747a8ca6bd2bc25c473699afc783d5dce836bc341090
+
+PS: The order of options doesn't really matter but anything that is been put after the image name will be passed as an argument to the container entry-point. 
+
+
+   
+           
+
+
+
+
+
+
 
 
 
