@@ -167,7 +167,7 @@ Note: The above command will shut down a container gracefully by sending a <code
 docker container kill <container ID or name>
 ```
 _PS: Stopped container remain in the system and can restarted._
-### Start and Restating a container
+### Start and Restarting a container
 -----------------------------------
 
 Two scenarios to be noticed here:
