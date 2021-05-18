@@ -220,22 +220,69 @@ The option <code>--rm</code> for the <code>docker container run</code> allows to
 ```shell
 docker container run --rm --detach --publish 8383:80 --name hello-volatile fhsinchy/hello-dock
 ```
-   
-           
+### Running a container in an interactive mode
+----------------------------------------------
+Images can hold or can carry on programs that are interactive with the user running them, all images are not so simple as what've been seen previously.
+Popular distribution such as Fedora, Ubuntu, Debian, ... have docker image in the hub. Programming language such as python, php, java, javascript, ... etc do also have their official image in the hub. Such images are configured to run a shell by command, in case of the OS it can be something like <code>bash</code> or <code>sh</code> and programming languages usually use their default shell.
+The option <code>-it (or --interactive --tty)</code> for <code>container run</code> command will run an image in interactive mode as :
+```shell
+docker container run --rm -it ubuntu
+Unable to find image 'ubuntu:latest' locally
+latest: Pulling from library/ubuntu
+345e3491a907: Pull complete 
+57671312ef6f: Pull complete 
+5e9250ddb7d0: Pull complete 
+Digest: sha256:cf31af331f38d1d7158470e095b132acd126a7180a54f263d386da88eb681d93
+Status: Downloaded newer image for ubuntu:latest
+root@20fc27827b42:/# uname -a
+Linux 20fc27827b42 4.19.0-16-amd64 #1 SMP Debian 4.19.181-1 (2021-03-19) x86_64 x86_64 x86_64 GNU/Linux
+root@20fc27827b42:/# ls
+bin   dev  home  lib32  libx32  mnt  proc  run   srv  tmp  var
+boot  etc  lib   lib64  media   opt  root  sbin  sys  usr
+root@20fc27827b42:/# 
+```
+### Executing commands inside a container
+-----------------------------------------
+Image can also be configured to receive arguments and perform a certain task. Docker is set to treat every string and/or numeric that comes after the image name to be treated as an argument. 
+```shell
+docker run --rm alpine uname -a
+Linux 68bc1f23d028 4.19.0-16-amd64 #1 SMP Debian 4.19.181-1 (2021-03-19) x86_64 Linux
+```
+In the command above the uname -a is passed through the alpine image and get executed. 
 
+### Working with executable images
+----------------------------------
+Executable images are meant to behave as executable programs. 
+Some of these images are designed to perform task with local OS files, it could be deleting corrupted files, creating or installing programs, ... etc.
+Using **bind mounts** helps granting a container direct access to our local files system. A bind mount lets us perform a two way data binding between the container of a local file system directory (source) and another directory inside a container (destination). This way any changes made in the destination directory will take effect on the source directory and vise versa. 
+```shell
+touch hvt.pdf
+fabric@km:~$ touch a.pdf c.pdf e.pdf off.pdf
+fabric@km:~$ docker container run --rm -v $(pwd):/zone fhsinchy/rmbyext pdf
+Unable to find image 'fhsinchy/rmbyext:latest' locally
+latest: Pulling from fhsinchy/rmbyext
+801bfaa63ef2: Already exists 
+8723b2b92bec: Pull complete 
+4e07029ccd64: Pull complete 
+594990504179: Pull complete 
+140d7fec7322: Pull complete 
+23038161e8da: Pull complete 
+0b40a42464a5: Pull complete 
+Digest: sha256:58969069a70a7f9b29be83abd1465cf10c568049c9d183e9d7a7d8726d074048
+Status: Downloaded newer image for fhsinchy/rmbyext:latest
+Removing: PDF
+c.pdf
+hvt.pdf
+e.pdf
+a.pdf
+off.pdf
+```
+The image fhsinchy/rmbyext is an executable one that delete file by extensions. We used bind mount to bind the zone/ directory in the contianer to our local filesystems. We created some .pdf files and deleted them with the executable container.
+The option <code>-v (or --volume) $(pwd):zone/</code> a seen is used for creating a bind mount for a container, it can take three fields separated by (<code>:</code>). The generic systax is as follow :
+```shell
+--volume <local file system directory absolute path>:<container file system directory absolute path>:<read write access>
+```
+The third field is optional but you must pass the absolute path of your local directory and the absolute path of the directory inside the container.
+The difference between a regular image and an executable one is that the entry-point for an executable image is set to a custom program instead of sh, in this case the rmbyext program. And as you've learned in the previous sub-section, anything you write after the image name in a container run command gets passed to the entry-point of the image.
 
-
-
-
-
-
-
-
-            
- 
-
-
-
-
-
-
+So in the end the <code>docker container run --rm -v $(pwd):/zone fhsinchy/rmbyext pdf</code> command translates to <code>rmbyext pdf</code> inside the container. Executable images are not that common in the wild but can be very useful in certain cases.
