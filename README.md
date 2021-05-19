@@ -7,7 +7,7 @@ A cheat sheet of its common used commands\
 A yet minimal, simple to be complex guide on docker.
 Based on [The Docker Handbook](https://www.freecodecamp.org/news/the-docker-handbook/#introduction-to-containerization-and-docker "FreeCodeCamp") but not only.
 
-## Headlines
+## Table of contents
 <details>
   <summary>Click to expand</summary>
 
