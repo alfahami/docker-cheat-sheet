@@ -12,7 +12,7 @@ Based on [The Docker Handbook](https://www.freecodecamp.org/news/the-docker-hand
   <summary>Click to expand</summary>
 
 + #### [Containerization](#containerization)
-+ #### [Dcoker architecture](#docker-architecture)
++ #### [Docker architecture](#docker-architecture)
 + ### [Diverses manipulations](#div-manips)
   + [Basic manipulations](#basic-manips)
   + [Publish a port](#publish-port)
