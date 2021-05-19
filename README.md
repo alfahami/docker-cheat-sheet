@@ -311,7 +311,7 @@ The difference between a regular image and an executable one is that the entry-p
 
 So in the end the <code>docker container run --rm -v $(pwd):/zone fhsinchy/rmbyext pdf</code> command translates to <code>rmbyext pdf</code> inside the container. Executable images are not that common in the wild but can be very useful in certain cases.
 
-<div style="text-align: right">
+<div align="right">
 
 [Back to top](#) &#8593;
 
