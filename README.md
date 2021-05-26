@@ -140,7 +140,8 @@ Docker as a software was designing in consist of three major components:
   ------------------
   As isolated environments as containers, the OS doesn't know nothing about what's going on inside them. Hence applications running inside them reamin inaccessible from the outside.
 
-  To allow access from the outside, We must publish the appropriate port inside the container to a port on your local network. The common sysntax is <code>--publish or -p</code>
+  To allow access from the outside, We must publish the appropriate port inside the container to a port on your local network.<br>
+  The common sysntax is <code>--publish or -p</code>
   <code>--publish \<host port> \<container port></code>
   <code>docker run container --publish 8080:80 /repo/docker-image</code> : publish the image /repo/docker-image to the port 8080 locally.
 
