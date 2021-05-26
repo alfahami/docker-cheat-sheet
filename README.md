@@ -147,8 +147,10 @@ Docker as a software was designing in consist of three major components:
 Known as the **detach mode**, this mode keeps running the container int he background. The option to be used is <code>--detach or -d</code>
 Note that this command output the full _CONTAINER ID_ of the newely created container on the terminal
 <code>docker run container --detach --publish 808:80 /repo/docker-image</code>\
-output: 9e634a231ea4e37f94ef747a8ca6bd2bc25c473699afc783d5dce836bc341090
-
+output: 
+```shell
+9e634a231ea4e37f94ef747a8ca6bd2bc25c473699afc783d5dce836bc341090
+```
 PS: The order of options doesn't really matter but anything that is been put after the image name will be passed as an argument to the container entry-point. 
 
 ### Listing Containers <a name="listing-containers"></a>
@@ -257,12 +259,12 @@ latest: Pulling from library/ubuntu
 5e9250ddb7d0: Pull complete 
 Digest: sha256:cf31af331f38d1d7158470e095b132acd126a7180a54f263d386da88eb681d93
 Status: Downloaded newer image for ubuntu:latest
-root@20fc27827b42:/# uname -a
+root@20fc27827b42:/ # uname -a
 Linux 20fc27827b42 4.19.0-16-amd64 #1 SMP Debian 4.19.181-1 (2021-03-19) x86_64 x86_64 x86_64 GNU/Linux
-root@20fc27827b42:/# ls
+root@20fc27827b42:/ # ls
 bin   dev  home  lib32  libx32  mnt  proc  run   srv  tmp  var
 boot  etc  lib   lib64  media   opt  root  sbin  sys  usr
-root@20fc27827b42:/# 
+root@20fc27827b42:  
 ```
 ### Executing commands inside a container <a name="exec-inside-cont"></a>
 -----------------------------------------
@@ -333,19 +335,19 @@ To achieve that, we create a Dockerfile with '_Dockerfile_'.
 A dockerfile is a set of instructions once executed by the daemon result in an image.
 It content could look like:
 ```shell
-FROM ubuntu:latest //every valid dockerfile start with FROM
-                  //setting the base image for the resultant image
+FROM ubuntu:latest # every valid dockerfile start with FROM
+                  # setting the base image for the resultant image
 
-EXPOSE 80        // indicate the port that needs to be published
+EXPOSE 80        # indicate the port that needs to be published
 
-// RUN execute a command inside the container shell
+# RUN execute a command inside the container shell
 RUN apt-get update && \
     apt-get install nginx -y && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*     //used for clearing package cache so unecessary baggage 
+    apt-get clean && rm -rf /var/lib/apt/lists/*     # used for clearing package cache so unecessary baggage 
 
-// set the default command for the image
-// written in exec mode but can also be written in shell mode
-// nginx refers to the exec of nginx and -g daemon off are option for the command nginx
+# set the default command for the image
+# written in exec mode but can also be written in shell mode
+# nginx refers to the exec of nginx and -g daemon off are option for the command nginx
 CMD ["nginx", "-g", "daemon off;"] 
 ```
 
@@ -747,7 +749,6 @@ latest: digest: sha256:1c98877bb3e6b3ea2c38f8e8cf80c94ea768b238cd6edf7cef7f0a24c
 *Note* *:* *It should be custom instead of cutsom in the last build and push command. Anyway it doesn't matter.*
 
 Depending on the image size, the upload may take some time. Once it's done the image is to be found in your hub profile page.
-
 
 <div align="right">
 
