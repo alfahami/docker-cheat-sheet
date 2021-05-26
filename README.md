@@ -7,7 +7,6 @@ A cheat sheet of its common used commands\
 A yet minimal, simple to be complex guide on docker.
 Based on [The Docker Handbook](https://www.freecodecamp.org/news/the-docker-handbook/#introduction-to-containerization-and-docker "FreeCodeCamp") but not only.
 
-## Table of contents
 <details>
   <summary>Click to expand</summary>
 
@@ -122,7 +121,7 @@ Docker as a software was designing in consist of three major components:
    By default, Docker Daemon look for images in the hub that are not present locally and once an image has been fetched, it will stay in the local cache.
    In case of newer images, the Daemon will fetch them automatically.
 
-   ## Diverses manipulations <a name="div-manips"></a>
+   ## Docker Container Basics manipulations <a name="div-manips"></a>
 
    ### Basic manipulations <a name="basic-manips"></a>
    -----------------------
@@ -316,3 +315,164 @@ So in the end the <code>docker container run --rm -v $(pwd):/zone fhsinchy/rmbye
 [Back to top](#) &#8593;
 
 </div>
+
+## Docker Image Manipulations Basics
+Creating, running, and sharing images online.
+
+### Creating docker image
+Images are multi-layered self-contained files that act as the template for creating docker contaienrs; kind of like a frozen, read-only type of container.
+
+To create one, we must have a clear vision of what we want from the image. Ex: the image should run apache server, nginx, ... etc
+
+Let's create our own custom nginx docker image that behaves like the official one which aims to run nginx on localhost once started.
+
+Our vision of the image could be like:
+  * The image should have NGINX pre-installed which can be done using a package manager or can be built from source
+  * Upon running, the image should start NGINX
+To achieve that, we create a Dockerfile with '_Dockerfile_'.
+A dockerfile is a set of instructions once executed by the daemon result in an image.
+It content could look like:
+```shell
+FROM ubuntu:latest //every valid dockerfile start with FROM
+                  //setting the base image for the resultant image
+
+EXPOSE 80        // indicate the port that needs to be published
+
+// RUN execute a command inside the container shell
+RUN apt-get update && \
+    apt-get install nginx -y && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*     //used for clearing package cache so unecessary baggage 
+
+// set the default command for the image
+// written in exec mode but can also be written in shell mode
+// nginx refers to the exec of nginx and -g daemon off are option for the command nginx
+CMD ["nginx", "-g", "daemon off;"] 
+```
+
+To build the image we use the command
+```shell
+docker image <command> <options>
+```
+We might use <code>docker image build .</code> to build the image from the dockerfile we just wrote in the current folder we're in. The daemon find any file named Dockerfile in the specified director and build the image based to it.
+
+```shell
+Setting up nginx (1.18.0-0ubuntu1) ...
+Processing triggers for libc-bin (2.31-0ubuntu9.2) ...
+Removing intermediate container ae4a677d9589
+ ---> a1dd5cb62e66
+Step 4/4 : CMD ["nginx", "-g", "daemon off;"]
+ ---> Running in ff731d5048b6
+Removing intermediate container ff731d5048b6
+ ---> 271ff7c9945f
+Successfully built 271ff7c9945f
+```
+Notice that the build will always output the ID of the image if everything went perfectLet's our container of the image we just built.
+```shell
+$ docker container run --rm --detach --name custom-nginx-packaged --publish 8080:80 271ff7c9945f
+2f23d718e9f6f389aaef13cb5f4e6afc033c38025ccf47e3e432fe6f1b5e70f5
+$ docker container ls
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS          PORTS                                   NAMES
+2f23d718e9f6   271ff7c9945f   "nginx -g 'daemon of…"   38 seconds ago   Up 35 seconds   0.0.0.0:8080->80/tcp, :::8080->80/tcp   custom-nginx-packaged
+```
+### How to tag docker image
+Instead of relying on the randomly generated ID of the image, we can assign a custom identifier to our images by using the <code>-tag or -t</code> option to the <code>docker image</code> with this generic syntax:
+```shell
+--tag <image repository>:<image tag>
+```
+The repository is usually the image name and the tag indicates a certain build or version. Ex: <code>docker container run mysql:5.7</code>
+
+```shell
+docker image build --tag custom-nginx:packaged .
+Sending build context to Docker daemon  2.048kB
+Step 1/4 : FROM ubuntu:latest
+ ---> 7e0aa2d69a15
+Step 2/4 : EXPOSE 80
+ ---> Using cache
+ ---> a4642d990b1e
+Step 3/4 : RUN apt-get update &&     apt-get install nginx -y &&     apt-get clean && rm -rf /var/lib/apt/lists/*
+ ---> Using cache
+ ---> a1dd5cb62e66
+Step 4/4 : CMD ["nginx", "-g", "daemon off;"]
+ ---> Using cache
+ ---> 271ff7c9945f
+Successfully built 271ff7c9945f
+Successfully tagged custom-nginx:packaged
+```
+To change the tag of an existing or an already built image we use:
+```shell
+docker image tag <image id> <image repository>:<image tag>
+
+## or ##
+
+docker image tag <image repository>:<image tag> <new image repository>:<new image tag>
+```
+### Listing and removing docker images
+```shell
+docker image ls // list all images avalaibale
+REPOSITORY                   TAG            IMAGE ID       CREATED         SIZE
+custom-nginx                 packaged       271ff7c9945f   8 hours ago     132MB
+ubuntu                       latest         7e0aa2d69a15   4 weeks ago     72.7MB
+```
+Listed images can be removed by:
+```shell
+docker image rm <image identifier>
+```
+The identifier can be the image ID or the image repository. We must use the tag when we use the repository instead of the random ID
+```shell
+docker image rm custom-nginx:packaged 
+Untagged: custom-nginx:packaged
+Deleted: sha256:271ff7c9945fd76d5347255c20bb6d7f13c326799aef339c09cc9c2d4435c42f
+Deleted: sha256:a1dd5cb62e666951c0b0a8b6e8ca54fe42bfc36185432131782cd7a18d878627
+Deleted: sha256:4621725ccf5e5422e936c19f5dfedbf9cc0297257ba88ed523950e05f610cd30
+Deleted: sha256:a4642d990b1e2232265f10bdc6243cdb50e5fb0169035215fe4817e5e3517b08
+```
+To cleanup all un-tagged dangling image, we may use :
+```shell
+docker image prune --force (-f) # remove untagged dangling image without confirmation
+## or ##
+docker image prune | --force | --all (-a) ## remove all cached image with or without (--force) confirmation 
+```
+### Understanding the many layers of an image
+<code>image history</code> command is used to vizualise the many layers of an image.
+```shell
+docker image history custom-ngix:packaged 
+IMAGE          CREATED              CREATED BY                                      SIZE      COMMENT
+fafb482a6d08   12 seconds ago       /bin/sh -c #(nop)  CMD ["nginx" "-g" "daemon…   0B        
+839d55a75553   16 seconds ago       /bin/sh -c apt-get update &&     apt-get ins…   59.2MB    
+9653184ba483   About a minute ago   /bin/sh -c #(nop)  EXPOSE 80                    0B        
+7e0aa2d69a15   4 weeks ago          /bin/sh -c #(nop)  CMD ["/bin/bash"]            0B        
+<missing>      4 weeks ago          /bin/sh -c mkdir -p /run/systemd && echo 'do…   7B        
+<missing>      4 weeks ago          /bin/sh -c [ -z "$(apt-get indextargets)" ]     0B        
+<missing>      4 weeks ago          /bin/sh -c set -xe   && echo '#!/bin/sh' > /…   811B      
+<missing>      4 weeks ago          /bin/sh -c #(nop) ADD file:5c44a80f547b7d68b…   72.7MB 
+```
+This image has 8 layers, the last one is the most recent.
+Let's dig deeper into these layers by ignoring the last 4.
+  * <code>7e0aa2d69a15</code> was created by <code>/bin/sh -c #(nop)  CMD</code> 
+  <code>/bin/sh -c #(nop)  CMD ["/bin/bash"]</code>which indicates that the default shell inside Ubuntu has been loaded successfully.
+
+* <code>9653184ba483</code> was created by <code>/bin/sh -c #(nop)  EXPOSE 80</code> which was the second instruction in your code.
+
+* <code>839d55a75553</code> was created by <code>/bin/sh -c apt-get update && apt-get install nginx -y && apt-get clean && rm -rf /var/lib/apt/lists/* </code> which was the third instruction in your code. You can also see that this image has a size of 60MB given all necessary packages were installed during the execution of this instruction.
+  
+* Finally the upper most layer <code>fafb482a6d08</code> was created by <code>/bin/sh -c #(nop)  CMD ["nginx", "-g", "daemon off;"]</code> which sets the default command for this image.
+
+Many read-only layers, each recording a new set of changes to the state triggered by certain istruction make the final image.
+Once we start a contianer we get a new writable layer on top of other layers.
+
+A technical concept called a **union file system** is what have made the layering phenomenon that happens everytime we work with docker possible.
+As Wikipedia state :
+<blockquote>
+It allows files and directories of separate file systems, known as branches, to be transparently overlaid, forming a single coherent file system. Contents of directories which have the same path within the merged branches will be seen together in a single merged directory, within the new, virtual filesystem.
+</blockquote>
+By utilizing this concept, Docker can avoid data duplication and can use previously created layers as a cache for later builds. This results in compact, efficient images that can be used everywhere.
+
+
+
+
+<div align="right">
+
+[Back to top](#) &#8593;
+
+</div>
+
