@@ -62,9 +62,11 @@ The key ideas are:
 
 
 The offical Docker <u>[resources](https://www.docker.com/resources/what-container)</u> state:
-> A container is an abstraction at the application layer that packages code and dependencies together. Instead of virtualizing the entire physical machine, containers virtualize the host operating system only.
+> A container is an abstraction at the application layer that packages code and dependencies together.<br> 
+  Instead of virtualizing the entire physical machine, containers virtualize the host operating system only.
 
-Containers are completely isolated environments from the host system as well as from each other. They're a lot lighter than the traditional VM and a large number of containers can be run simultaneously without affecting the performance of the host system. Containers are considered to be the next generation of virtual machines.*
+Containers are completely isolated environments from the host system as well as from each other.<br>
+They're a lot lighter than the traditional VM and a large number of containers can be run simultaneously without affecting the performance of the host system. Containers are considered to be the next generation of virtual machines.*
 
 ##### A little comparison between VM and Containers
 -----------------------------------------
@@ -93,7 +95,7 @@ These commands shows that docker uses the kernel of the host OS
 
 ## Waht is a Docker Image <a name="images"></a>
 
-Images are multi-layered self-contained files that act as the template for creating containers.They are like a frozen, read-only copy of a container and can be exchanged through registries. The OCI (Open Container Initiative) defined a standard specification for images which is complied by the major containerization engines out there. a docker image can be used with another runtime like Podman without any additional hassle.
+Images are multi-layered self-contained files that act as the template for creating containers.They are like a frozen, read-only copy of a container and can be exchanged through registries.<br> The OCI (Open Container Initiative) defined a standard specification for images which is complied by the major containerization engines out there. a docker image can be used with another runtime like Podman without any additional hassle.
 Containers are just image in running states.
 
 ## What is a Docker Registry <a name="registry"></a>
@@ -146,7 +148,7 @@ Docker as a software was designing in consist of three major components:
 -----------------------------------------
 Known as the **detach mode**, this mode keeps running the container int he background. The option to be used is <code>--detach or -d</code>
 Note that this command output the full _CONTAINER ID_ of the newely created container on the terminal
-<code>docker run container --detach --publish 808:80 /repo/docker-image</code>\
+<code>docker run container --detach --publish 808:80 /repo/docker-image</code>
 output: 
 ```shell
 9e634a231ea4e37f94ef747a8ca6bd2bc25c473699afc783d5dce836bc341090
@@ -247,8 +249,8 @@ docker container run --rm --detach --publish 8383:80 --name hello-volatile fhsin
 ```
 ### Running a container in an interactive mode <a name="run-container-it-mode"></a>
 ----------------------------------------------
-Images can hold or can carry on programs that are interactive with the user running them, all images are not so simple as what've been seen previously.\
-Popular distribution such as Fedora, Ubuntu, Debian, ... have docker image in the hub\ Programming language such as python, php, java, javascript, ... etc do also have their official image in the hub. Such images are configured to run a shell by command, in case of the OS it can be something like <code>bash</code> or <code>sh</code> and programming languages usually use their default shell.\
+Images can hold or can carry on programs that are interactive with the user running them, all images are not so simple as what've been seen previously.<br>
+Popular distribution such as Fedora, Ubuntu, Debian, ... have docker image in the hub\ Programming language such as python, php, java, javascript, ... etc do also have their official image in the hub. Such images are configured to run a shell by command, in case of the OS it can be something like <code>bash</code> or <code>sh</code> and programming languages usually use their default shell.<br>
 The option <code>-it (or --interactive --tty)</code> for <code>container run</code> command will run an image in interactive mode as :
 ```shell
 docker container run --rm -it ubuntu
@@ -279,8 +281,9 @@ In the command above the uname -a is passed through the alpine image and get exe
 ### Working with executable images <a name="work-exec-images"></a>
 ----------------------------------
 Executable images are meant to behave as executable programs. 
-Some of these images are designed to perform task with local OS files, it could be deleting corrupted files, creating or installing programs, ... etc.\
-Using **bind mounts** helps granting a container direct access to our local files system. A bind mount lets us perform a two way data binding between the container of a local file system directory (source) and another directory inside a container (destination). This way any changes made in the destination directory will take effect on the source directory and vise versa. 
+Some of these images are designed to perform task with local OS files, it could be deleting corrupted files, creating or installing programs, ... etc.<br>
+Using **bind mounts** helps granting a container direct access to our local files system. A bind mount lets us perform a two way data binding between the container of a local file system directory (source) and another directory inside a container (destination).<br>
+This way any changes made in the destination directory will take effect on the source directory and vise versa. 
 ```shell
 touch hvt.pdf
 fabric@km:~$ touch a.pdf c.pdf e.pdf off.pdf
@@ -303,13 +306,13 @@ e.pdf
 a.pdf
 off.pdf
 ```
-The image <code>fhsinchy/rmbyext</code> is an executable one that delete file by extensions. We used bind mount to bind the <code>zone/</code> directory in the contianer to our local filesystems. We created some .pdf files and deleted them with the executable container.\
+The image <code>fhsinchy/rmbyext</code> is an executable one that delete file by extensions. We used bind mount to bind the <code>zone/</code> directory in the contianer to our local filesystems. We created some .pdf files and deleted them with the executable container.<br>
 The option <code>-v (or --volume) $(pwd):zone/</code> a seen is used for creating a bind mount for a container, it can take three fields separated by (<code>:</code>). The generic systax is as follow :
 ```shell
 --volume <local file system directory absolute path>:<container file system directory absolute path>:<read write access>
 ```
-The third field is optional but you must pass the absolute path of your local directory and the absolute path of the directory inside the container.\
-The difference between a regular image and an executable one is that the entry-point for an executable image is set to a custom program instead of sh, in this case the rmbyext program.\
+The third field is optional but you must pass the absolute path of your local directory and the absolute path of the directory inside the container.<br>
+The difference between a regular image and an executable one is that the entry-point for an executable image is set to a custom program instead of sh, in this case the rmbyext program.<br>
 And as you've learned in the previous sub-section, anything you write after the image name in a container run command gets passed to the entry-point of the image.
 
 So in the end the <code>docker container run --rm -v $(pwd):/zone fhsinchy/rmbyext pdf</code> command translates to <code>rmbyext pdf</code> inside the container. Executable images are not that common in the wild but can be very useful in certain cases.
@@ -357,7 +360,8 @@ To build the image we use the command
 ```shell
 docker image <command> <options>
 ```
-We might use <code>docker image build .</code> to build the image from the dockerfile we just wrote in the current folder we're in. The daemon find any file named Dockerfile in the specified director and build the image based to it.
+We might use <code>docker image build .</code> to build the image from the dockerfile we just wrote in the current folder we're in.<br>
+The daemon find any file named Dockerfile in the specified director and build the image based to it.
 
 ```shell
 Setting up nginx (1.18.0-0ubuntu1) ...
@@ -468,7 +472,8 @@ Once we start a contianer we get a new writable layer on top of other layers.
 A technical concept called a **union file system** is what have made the layering phenomenon that happens everytime we work with docker possible.
 As Wikipedia state :
 <blockquote>
-It allows files and directories of separate file systems, known as branches, to be transparently overlaid, forming a single coherent file system. Contents of directories which have the same path within the merged branches will be seen together in a single merged directory, within the new, virtual filesystem.
+It allows files and directories of separate file systems, known as branches, to be transparently overlaid, forming a single coherent file system.<br>
+Contents of directories which have the same path within the merged branches will be seen together in a single merged directory, within the new, virtual filesystem.
 </blockquote>
 By utilizing this concept, Docker can avoid data duplication and can use previously created layers as a cache for later builds. This results in compact, efficient images that can be used everywhere.
 
@@ -573,8 +578,8 @@ docker container run --rm --detach --name custom-nginx-built --publish 8080:80 c
 c0d3377bf53d748bb3b498f65ab18240342a376d1ff21c4027a1860910d1a737
 ```
 ### Optimizing docker images
-images should be lightweight and hold only what is necessary for them to be run.\
-In the previous image we built, there is a lot of dependancies needed to build the image but not to execute and run it.\
+images should be lightweight and hold only what is necessary for them to be run.<br>
+In the previous image we built, there is a lot of dependancies needed to build the image but not to execute and run it.<br>
 Out of the 6 packages that used to install nginx, only two are necessary for running it.
 We need to add those lines to our Dockerfile in the <code>RUN</code> instruction in order to remove the unecessary packages.
 ```shell
@@ -590,8 +595,8 @@ apt-get remove build-essential \
 
 ### What about Alpine Linux ?
 A full featured Linux distribution like <ins>Ubuntu</ins>, <ins>Debian</ins> or <ins>Fedora</ins>.
-It is built around <code>musl</code> <code>libc</code> and <code>busybox</code> and is lightweight. Where the latest <ins>Ubuntu</ins> image weighs at around 28MB, <ins>alpine</ins> weighs 2.8MB.\
-Alpine is also secure and is a much better fit for creating containers than the other distributions.\
+It is built around <code>musl</code> <code>libc</code> and <code>busybox</code> and is lightweight. Where the latest <ins>Ubuntu</ins> image weighs at around 28MB, <ins>alpine</ins> weighs 2.8MB.<br>
+Alpine is also secure and is a much better fit for creating containers than the other distributions.<br>
 Let's build our <code>custom-nginx</code> using the Alpine image as it base.
 The <code>Dockerfile</code> would look like :
 ```shell
@@ -759,4 +764,3 @@ Depending on the image size, the upload may take some time. Once it's done the i
 [Back to top](#) &#8593;
 
 </div>
-
