@@ -138,7 +138,8 @@ Docker as a software was designing in consist of three major components:
 
   ### Publish a port <a name="publish-port"></a>
   ------------------
-  As isolated environments as containers, the OS doesn't know nothing about what's going on inside them. Hence applications running inside them reamin inaccessible from the outside.
+  As isolated environments as containers, the OS doesn't know nothing about what's going on inside them.<br>
+  Hence applications running inside them reamin inaccessible from the outside.
 
   To allow access from the outside, We must publish the appropriate port inside the container to a port on your local network.<br>
   The common sysntax is <code>--publish or -p</code>
@@ -147,7 +148,8 @@ Docker as a software was designing in consist of three major components:
 
 ### Running a container in the background <a name="run-bkgd"></a>
 -----------------------------------------
-Known as the **detach mode**, this mode keeps running the container int he background. The option to be used is <code>--detach or -d</code>
+Known as the **detach mode**, this mode keeps running the container int he background.<br>
+The option to be used is <code>--detach or -d</code>
 Note that this command output the full _CONTAINER ID_ of the newely created container on the terminal
 <code>docker run container --detach --publish 808:80 /repo/docker-image</code>
 output: 
