@@ -151,7 +151,7 @@ Docker as a software was designing in consist of three major components:
 Known as the **detach mode**, this mode keeps running the container int he background.<br>
 The option to be used is <code>--detach or -d</code><br>
 Note that this command output the full _CONTAINER ID_ of the newely created container on the terminal
-<code>docker run container --detach --publish 808:80 /repo/docker-image</code>
+<code>docker run container --detach --publish 808:80 /repo/docker-image</code><br>
 output: 
 ```shell
 9e634a231ea4e37f94ef747a8ca6bd2bc25c473699afc783d5dce836bc341090
