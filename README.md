@@ -467,7 +467,286 @@ It allows files and directories of separate file systems, known as branches, to 
 </blockquote>
 By utilizing this concept, Docker can avoid data duplication and can use previously created layers as a cache for later builds. This results in compact, efficient images that can be used everywhere.
 
+### Building NGNIX From Source
+The goal of this subsection is to learn and get familiar with more instructions.
+In order to build NGNIX from source we need the source of [ngnix](http://nginx.org/download/nginx-1.20.1.tar.gz).
+We'll be following seven steps to get our final image:
+  * Getting a good base image for building applications such as [ubuntu](https://hub.docker.com/_/ubuntu)
+  * Install necessary build dependancies on the base image.
+  * Copy the <code>nginx-X.XX.X.tar.gz</code> file inside the image.
+  * Extract the contents of the archive and get rid of it.
+  * Configure the build, compile and installthe program using the <code>make</code> tool.
+  * Get rid of the extracted source code
+  * Run <code>nginx</code> executable.
+Let's create the <code>Dockerfile</code> as :
+```shell
+FROM ubuntu:latest
 
+# install the standard packages that are necessary for building nginx
+RUN apt-get update && \
+    apt-get install build-essential\ 
+                    libpcre3 \
+                    libpcre3-dev \
+                    zlib1g \
+                    zlib1g-dev \
+                    libssl1.1 \
+                    libssl-dev \
+                    -y && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# copying the nginx file to the image
+COPY nginx-1.19.2.tar.gz .
+
+# extract contents using tar command
+RUN tar -xvf nginx-1.19.2.tar.gz && rm nginx-1.19.2.tar.gz
+
+# installing nginx inside the extracted folder using make
+RUN cd nginx-1.19.2 && \
+    ./configure \
+        --sbin-path=/usr/bin/nginx \
+        --conf-path=/etc/nginx/nginx.conf \
+        --error-log-path=/var/log/nginx/error.log \
+        --http-log-path=/var/log/nginx/access.log \
+        --with-pcre \
+        --pid-path=/var/run/nginx.pid \
+        --with-http_ssl_module && \
+    make && make install
+
+# removing the directory once the build & installation complete
+RUN rm -rf /nginx-1.19.2
+
+CMD ["nginx", "-g", "daemon off;"]
+```
+We build the image using :
+```shell
+docker image build --tag custom-nginx:built .
+```
+#### Improvement of Dockerfile
+  * Instead of hard coding the filename like <code>nginx.X.XX.X.tar.gz</code>  we can create an argument using <code>ARG</code> instruction, so we can easily change the version of the filename through the argument
+  * We can let the daemon download the archive manually during the process using the <code>ADD</code> which is capable of adding files from the internet.
+```shell
+FROM ubuntu:latest
+
+RUN apt-get update && \
+    apt-get install build-essential\ 
+                    libpcre3 \
+                    libpcre3-dev \
+                    zlib1g \
+                    zlib1g-dev \
+                    libssl1.1 \
+                    libssl-dev \
+                    -y && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# declare var and can be accessed using {ARGNAME}
+ARG FILENAME="nginx-1.19.2"
+ARG EXTENSION="tar.gz"
+
+# dowload the archive from the internet.
+ADD https://nginx.org/download/${FILENAME}.${EXTENSION} .
+
+RUN tar -xvf ${FILENAME}.${EXTENSION} && rm ${FILENAME}.${EXTENSION}
+
+RUN cd ${FILENAME} && \
+    ./configure \
+        --sbin-path=/usr/bin/nginx \
+        --conf-path=/etc/nginx/nginx.conf \
+        --error-log-path=/var/log/nginx/error.log \
+        --http-log-path=/var/log/nginx/access.log \
+        --with-pcre \
+        --pid-path=/var/run/nginx.pid \
+        --with-http_ssl_module && \
+    make && make install
+
+RUN rm -rf /${FILENAME}}
+
+CMD ["nginx", "-g", "daemon off;"]
+```
+Running the container on port 80 :
+```shell
+docker container run --rm --detach --name custom-nginx-built --publish 8080:80 custom-nginx:built 
+c0d3377bf53d748bb3b498f65ab18240342a376d1ff21c4027a1860910d1a737
+```
+### Optimizing docker images
+images should be lightweight and hold only what is necessary for them to be run.
+In the previous image we built, there is a lot of dependancies needed to build the image but not to execute and run it.
+Out of the 6 packages that used to install nginx, only two are necessary for running it.
+We need to add those lines to our Dockerfile in the <code>RUN</code> instruction in order to remove the unecessary packages.
+```shell
+apt-get remove build-essential \ 
+                    libpcre3-dev \
+                    zlib1g-dev \
+                    libssl-dev \
+                    -y && \
+    apt-get autoremove -y && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+```
+*Note* *:* _Splitting the removing instructions in two differents <code>RUN</code> instructions will result in different layers in the final image._
+
+### What about Alpine Linux ?
+A full featured Linux distribution like <ins>Ubuntu</ins>, <ins>Debian</ins> or <ins>Fedora</ins>.
+It is built around <code>musl</code> <code>libc</code> and <code>busybox</code> and is lightweight. Where the latest <ins>Ubuntu</ins> image weighs at around 28MB, <ins>alpine</ins> weighs 2.8MB.  Alpine is also secure and is a much better fit for creating containers than the other distributions.
+Let's build our <code>custom-nginx</code> using the Alpine image as it base.
+The <code>Dockerfile</code> would look like :
+```shell
+FROM alpine:latest
+
+EXPOSE 80
+
+ARG FILENAME="nginx-1.19.2"
+ARG EXTENSION="tar.gz"
+
+ADD https://nginx.org/download/${FILENAME}.${EXTENSION} .
+
+RUN apk add --no-cache pcre zlib && \
+    apk add --no-cache \
+            --virtual .build-deps \
+            build-base \ 
+            pcre-dev \
+            zlib-dev \
+            openssl-dev && \
+    tar -xvf ${FILENAME}.${EXTENSION} && rm ${FILENAME}.${EXTENSION} && \
+    cd ${FILENAME} && \
+    ./configure \
+        --sbin-path=/usr/bin/nginx \
+        --conf-path=/etc/nginx/nginx.conf \
+        --error-log-path=/var/log/nginx/error.log \
+        --http-log-path=/var/log/nginx/access.log \
+        --with-pcre \
+        --pid-path=/var/run/nginx.pid \
+        --with-http_ssl_module && \
+    make && make install && \
+    cd / && rm -rfv /${FILENAME} && \
+    apk del .build-deps
+
+CMD ["nginx", "-g", "daemon off;"]
+```
+Few changes in the dockerfile explained as :
+
+* Instead of using <code>apt-get install</code> for installing packages, we use apk add. The <code>--no-cache</code> option means that the downloaded package won't be cached. Likewise we'll use apk del instead of apt-get remove to uninstall packages.
+  
+* The <code>--virtual</code> option for the <code>apk add command</code> is used for bundling a bunch of packages into a single virtual package for easier management. Packages that are needed only for building the program are labeled as <code>.build-deps</code> which are then removed on line 29 by executing the <code>apk del .build-deps</code> command.
+  
+* The package names are a bit different here. Usually every Linux distribution has its package repository available to everyone where you can search for packages. If you know the packages required for a certain task, then you can just head over to the designated repository for a distribution and search for it.
+```shell
+docker image ls
+REPOSITORY            TAG        IMAGE ID       CREATED          SIZE
+custom-nginx          built      ccc12d5008df   55 seconds ago   12.2MB
+<none>                <none>     c048f5ceb3ce   17 minutes ago   85.3MB
+custom-ngix           packaged   fafb482a6d08   6 hours ago      132MB
+ubuntu                latest     7e0aa2d69a15   4 weeks ago      72.7MB
+alpine                latest     6dbb9cc54074   5 weeks ago      5.61MB
+fhsinchy/hello-dock   latest     f540930e8157   4 months ago     21.9MB
+```
+We can see how the image created with alpine is the most lightweight on all images.
+
+### Creating Executable images
+Before we start coding the <code>Dockerfile</code> the final output should be :
+  * The image should have Python pre-installed.
+  * It should contain a copy of my rmbyext script.
+  * A working directory should be set where the script will be executed.
+  * The rmbyext script should be set as the entry-point so the image can take extension names as arguments.
+
+The steps to be taken in order to achieve what've been planned :
+  * Get a good base image for running Python scripts, like python.
+  * Set-up the working directory to an easily accessible directory.
+  * Install Git so that the script can be installed from **fhsinchy** [GitHub repository](https://github.com/fhsinchy/rmbyext.git).
+  * Install the script using Git and pip.
+  * Get rid of the build's unnecessary packages.
+  * Set rmbyext as the entry-point for this image.
+
+Our <code>Dockerfile</code>
+```shell
+# set python as the base image, making it ideal for running python scripts usinf alpine variant python
+FROM python:3-alpine
+
+# set the default directory to zone/
+WORKDIR /zone
+
+# installs git & install rmbyext using git and pip and remove git aftewards
+RUN apk add --no-cache git && \
+    pip install git+https://github.com/fhsinchy/rmbyext.git#egg=rmbyext && \
+    apk del git
+
+# set the rmbyext as entry-point for this image
+ENTRYPOINT [ "rmbyext" ]
+```
+Now let's build the image using the following command :
+```shell
+docker image build --tag rmbyext-alpine .
+```
+Let's run and test the image :
+```shell
+docker container run --rm -v $(pwd):/zone rmbyext-alpine jpg pdf
+NO JPG FILES TO REMOVE.
+Removing: PDF
+arr.pdf
+hello.pdf
+```
+### Sharing Docker images online
+To share images online, one need to create an account on at any of the online registries such [Docker Hub](https://hub.docker.com/).
+Once the account create, one can be able to connect through dthe ocker CLI by :
+```shell
+docker login
+# enter username
+# type password to successfully login
+Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
+Username: alfahami
+Password: 
+WARNING! Your password will be stored unencrypted in /home/fabric/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+```
+In order to share an image online, the image has to be tagged as follow:
+<code>
+\<docker hub username>/\<image name>:\<image tag>
+</code>
+Let's run it :
+```shell
+docker image build --tag alfahami/cutsom-nginx:latest --file Dockerfile .
+Sending build context to Docker daemon   2.56kB
+Step 1/7 : FROM alpine:latest
+ ---> 6dbb9cc54074
+Step 2/7 : EXPOSE 80
+ ---> Using cache
+ ---> 9584e3678c54
+Step 3/7 : ARG FILENAME="nginx-1.19.2"
+ ---> Using cache
+ ---> 2bfb914d1cdc
+Step 4/7 : ARG EXTENSION="tar.gz"
+ ---> Using cache
+ ---> 5a3ed0ab8188
+Step 5/7 : ADD https://nginx.org/download/${FILENAME}.${EXTENSION} .
+Downloading  1.049MB/1.049MB
+ ---> Using cache
+ ---> 4364fd836a36
+Step 6/7 : RUN apk add --no-cache pcre zlib &&     apk add --no-cache             --virtual .build-deps             build-base             pcre-dev             zlib-dev             openssl-dev &&     tar -xvf ${FILENAME}.${EXTENSION} && rm ${FILENAME}.${EXTENSION} &&     cd ${FILENAME} &&     ./configure         --sbin-path=/usr/bin/nginx         --conf-path=/etc/nginx/nginx.conf         --error-log-path=/var/log/nginx/error.log         --http-log-path=/var/log/nginx/access.log         --with-pcre         --pid-path=/var/run/nginx.pid         --with-http_ssl_module &&     make && make install &&     cd / && rm -rfv /${FILENAME} &&     apk del .build-deps
+ ---> Using cache
+ ---> 40c2689da973
+Step 7/7 : CMD ["nginx", "-g", "daemon off;"]
+ ---> Using cache
+ ---> ccc12d5008df
+Successfully built ccc12d5008df
+Successfully tagged alfahami/cutsom-nginx:lates
+```
+In order to push to Docker Hub we use :
+```shell
+docker image push <image repository>:<image tag>
+```
+Which would be :
+```shell
+docker image push alfahami/cutsom-nginx:latest 
+The push refers to repository [docker.io/alfahami/cutsom-nginx]
+96bc2c13d1a1: Pushed 
+1d756dc4e694: Pushed 
+b2d5eeeaba3a: Mounted from library/python 
+latest: digest: sha256:1c98877bb3e6b3ea2c38f8e8cf80c94ea768b238cd6edf7cef7f0a24cb7bc13a size: 950
+```
+*Note* *:* *It should be custom instead of cutsom in the last build and push command. Anyway it doesn't matter.*
+
+Depending on the image size, the upload may take some time. Once it's done the image is to be found in your hub profile page.
 
 
 <div align="right">
