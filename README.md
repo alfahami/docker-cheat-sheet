@@ -126,11 +126,11 @@ Docker as a software was designing in consist of three major components:
    ### Basic manipulations <a name="basic-manips"></a>
    -----------------------
    * <code>docker \<object> \<command> \<options> </code> command syntax\
-             - \<object> : type of docker object to be manipulated\
-             - \<command> task to be carried by the <mark>Daemon</mark>\
-             - \<options> : any valid parameter that can override the default behaviour of the command.
+             - <code>\<object></code> : type of docker object to be manipulated\
+             - <code>\<command></code> task to be carried by the <mark>Daemon</mark>\
+             - <code>\<options></code> : any valid parameter that can override the default behaviour of the command.
   * <code>docker run \<image name> </code> or <code>docker container run \<image name></code>: run a container\
-  * the \<option> <code>--publish or -p</code> is for port mapping\
+  * the <code>\<option></code> <code>--publish or -p</code> is for port mapping\
   * <code>Ctrl +C </code> : stop the container
   
 
@@ -151,7 +151,7 @@ output:
 ```shell
 9e634a231ea4e37f94ef747a8ca6bd2bc25c473699afc783d5dce836bc341090
 ```
-PS: The order of options doesn't really matter but anything that is been put after the image name will be passed as an argument to the container entry-point. 
+*Note* *:* *The order of options doesn't really matter but anything that is been put after the image name will be passed as an argument to the container entry-point*. 
 
 ### Listing Containers <a name="listing-containers"></a>
 ------------------------
@@ -247,8 +247,8 @@ docker container run --rm --detach --publish 8383:80 --name hello-volatile fhsin
 ```
 ### Running a container in an interactive mode <a name="run-container-it-mode"></a>
 ----------------------------------------------
-Images can hold or can carry on programs that are interactive with the user running them, all images are not so simple as what've been seen previously.
-Popular distribution such as Fedora, Ubuntu, Debian, ... have docker image in the hub. Programming language such as python, php, java, javascript, ... etc do also have their official image in the hub. Such images are configured to run a shell by command, in case of the OS it can be something like <code>bash</code> or <code>sh</code> and programming languages usually use their default shell.
+Images can hold or can carry on programs that are interactive with the user running them, all images are not so simple as what've been seen previously.\
+Popular distribution such as Fedora, Ubuntu, Debian, ... have docker image in the hub\ Programming language such as python, php, java, javascript, ... etc do also have their official image in the hub. Such images are configured to run a shell by command, in case of the OS it can be something like <code>bash</code> or <code>sh</code> and programming languages usually use their default shell.\
 The option <code>-it (or --interactive --tty)</code> for <code>container run</code> command will run an image in interactive mode as :
 ```shell
 docker container run --rm -it ubuntu
@@ -268,7 +268,8 @@ root@20fc27827b42:
 ```
 ### Executing commands inside a container <a name="exec-inside-cont"></a>
 -----------------------------------------
-Image can also be configured to receive arguments and perform a certain task. Docker is set to treat every string and/or numeric that comes after the image name to be treated as an argument. 
+Image can also be configured to receive arguments and perform a certain task. 
+Docker is set to treat every string and/or numeric that comes after the image name to be treated as an argument. 
 ```shell
 docker run --rm alpine uname -a
 Linux 68bc1f23d028 4.19.0-16-amd64 #1 SMP Debian 4.19.181-1 (2021-03-19) x86_64 Linux
@@ -278,7 +279,7 @@ In the command above the uname -a is passed through the alpine image and get exe
 ### Working with executable images <a name="work-exec-images"></a>
 ----------------------------------
 Executable images are meant to behave as executable programs. 
-Some of these images are designed to perform task with local OS files, it could be deleting corrupted files, creating or installing programs, ... etc.
+Some of these images are designed to perform task with local OS files, it could be deleting corrupted files, creating or installing programs, ... etc.\
 Using **bind mounts** helps granting a container direct access to our local files system. A bind mount lets us perform a two way data binding between the container of a local file system directory (source) and another directory inside a container (destination). This way any changes made in the destination directory will take effect on the source directory and vise versa. 
 ```shell
 touch hvt.pdf
@@ -302,13 +303,14 @@ e.pdf
 a.pdf
 off.pdf
 ```
-The image fhsinchy/rmbyext is an executable one that delete file by extensions. We used bind mount to bind the zone/ directory in the contianer to our local filesystems. We created some .pdf files and deleted them with the executable container.
+The image <code>fhsinchy/rmbyext</code> is an executable one that delete file by extensions. We used bind mount to bind the <code>zone/</code> directory in the contianer to our local filesystems. We created some .pdf files and deleted them with the executable container.\
 The option <code>-v (or --volume) $(pwd):zone/</code> a seen is used for creating a bind mount for a container, it can take three fields separated by (<code>:</code>). The generic systax is as follow :
 ```shell
 --volume <local file system directory absolute path>:<container file system directory absolute path>:<read write access>
 ```
-The third field is optional but you must pass the absolute path of your local directory and the absolute path of the directory inside the container.
-The difference between a regular image and an executable one is that the entry-point for an executable image is set to a custom program instead of sh, in this case the rmbyext program. And as you've learned in the previous sub-section, anything you write after the image name in a container run command gets passed to the entry-point of the image.
+The third field is optional but you must pass the absolute path of your local directory and the absolute path of the directory inside the container.\
+The difference between a regular image and an executable one is that the entry-point for an executable image is set to a custom program instead of sh, in this case the rmbyext program.\
+And as you've learned in the previous sub-section, anything you write after the image name in a container run command gets passed to the entry-point of the image.
 
 So in the end the <code>docker container run --rm -v $(pwd):/zone fhsinchy/rmbyext pdf</code> command translates to <code>rmbyext pdf</code> inside the container. Executable images are not that common in the wild but can be very useful in certain cases.
 
@@ -368,7 +370,8 @@ Removing intermediate container ff731d5048b6
  ---> 271ff7c9945f
 Successfully built 271ff7c9945f
 ```
-Notice that the build will always output the ID of the image if everything went perfectLet's our container of the image we just built.
+Notice that the build will always output the ID of the image if everything went perfect.
+Let's run the container of the image we just built.
 ```shell
 $ docker container run --rm --detach --name custom-nginx-packaged --publish 8080:80 271ff7c9945f
 2f23d718e9f6f389aaef13cb5f4e6afc033c38025ccf47e3e432fe6f1b5e70f5
@@ -570,8 +573,8 @@ docker container run --rm --detach --name custom-nginx-built --publish 8080:80 c
 c0d3377bf53d748bb3b498f65ab18240342a376d1ff21c4027a1860910d1a737
 ```
 ### Optimizing docker images
-images should be lightweight and hold only what is necessary for them to be run.
-In the previous image we built, there is a lot of dependancies needed to build the image but not to execute and run it.
+images should be lightweight and hold only what is necessary for them to be run.\
+In the previous image we built, there is a lot of dependancies needed to build the image but not to execute and run it.\
 Out of the 6 packages that used to install nginx, only two are necessary for running it.
 We need to add those lines to our Dockerfile in the <code>RUN</code> instruction in order to remove the unecessary packages.
 ```shell
@@ -587,7 +590,8 @@ apt-get remove build-essential \
 
 ### What about Alpine Linux ?
 A full featured Linux distribution like <ins>Ubuntu</ins>, <ins>Debian</ins> or <ins>Fedora</ins>.
-It is built around <code>musl</code> <code>libc</code> and <code>busybox</code> and is lightweight. Where the latest <ins>Ubuntu</ins> image weighs at around 28MB, <ins>alpine</ins> weighs 2.8MB.  Alpine is also secure and is a much better fit for creating containers than the other distributions.
+It is built around <code>musl</code> <code>libc</code> and <code>busybox</code> and is lightweight. Where the latest <ins>Ubuntu</ins> image weighs at around 28MB, <ins>alpine</ins> weighs 2.8MB.\
+Alpine is also secure and is a much better fit for creating containers than the other distributions.\
 Let's build our <code>custom-nginx</code> using the Alpine image as it base.
 The <code>Dockerfile</code> would look like :
 ```shell
