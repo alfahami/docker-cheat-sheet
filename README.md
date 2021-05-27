@@ -27,7 +27,7 @@ Based on [The Docker Handbook](https://www.freecodecamp.org/news/the-docker-hand
   + [Working with executable images](#work-exec-images) 
 </details>
 
-## The idea behind containerization <a name="containerization"><a>
+## The idea behind containerization <a name="containerization"></a>
 
 
 According to IBM
