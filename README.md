@@ -119,7 +119,7 @@ Docker as a software was designing in consist of three major components:
 
    *Note* *:* *if the the image is not found in the local repository <code>Unable to find image 'image-name'</code> will be printed on the terminal.<br>
    The <mark>Daemon</mark> will reach out to default public registry (Docker Hub) and pulls in the last copy of the image if found.<br>
-   A new container will then be created from the fresly pulled image.<br>
+   A new container will then be created from the freshly pulled image.<br>
    By default, Docker Daemon look for images in the hub that are not present locally and once an image has been fetched, it will stay in the local cache.
    In case of newer images, the Daemon will fetch them automatically.*
 
