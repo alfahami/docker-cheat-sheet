@@ -107,11 +107,11 @@ A centralized place where you can upload your images and can also download image
 Docker as a software was designing in consist of three major components:
   1. **Docker Daemon** : The daemon( <mark>dockerd</mark> is a process running in the background and awaits for commands from the client. 
   2. **Docker Client** : The client (</mark>docker</mark>) is a CLI program mostly responsible for transporting commands isued by users
-  3. **RESt API** : The rest API acts as a bridge between the daemon and the client. Any commands issued using the client passes through the API to finally reach the daemon.
+  3. **REST API** : The rest API acts as a bridge between the daemon and the client. Any commands issued using the client passes through the API to finally reach the daemon.
    
    Docker officials state: 
 
-   "Docker uses a client-server architecture. The Docker *client* communicates with the the Docker _daemon_ which does heavey lifting of building, running, and distributing your Docker containers."
+   "Docker uses a client-server architecture. The Docker *client* communicates with the the Docker _daemon_ which does heavy lifting of building, running, and distributing your Docker containers."
 
    ### The big picutre
    -------------------
