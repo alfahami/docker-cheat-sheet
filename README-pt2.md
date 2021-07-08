@@ -164,6 +164,111 @@ node_modules
 ```
 The <code>.dockerignore</code> has to be in the build context. Files and directories mentionned here will be ignored by the <code>COPY</code> instruction. When using a bind mount, the <code>.dockerignorefile</code> won't have any effect.
 
+### Network Manipulation in Docker
+ Working with more than one container can be a little bit difficult, if we don't grasp the nuances of container isolation. 
+ The question here is : How to connect two completely isolated containers to each other? 
+ Some Approaches:
+ * Accessing one container using an exposed port (NOT RECOMMANDED)
+ * Accessing one container using its IP adress and defalut port (in case of server) [NOT RECOMANDED]
+
+**Best Approach** : connect them by putting them under a user-defined bridge network.
+
+#### Docker Network Basics
+A network in docker is another logical object like a contianer or image. There is a plethora of commands under the <code>docker network</code> group for manipulating network.
+```
+docker network ls # List the networks in our system
+
+# NETWORK ID     NAME      DRIVER    SCOPE
+# c2e59f2b96bd   bridge    bridge    local
+# 124dccee067f   host      host      local
+# 506e3822bf1f   none      null      local
+```
+By default, Docker has five networking drivers. They are as follows:
+
+* <code>bridge</code> - The default networking driver in Docker. This can be used when multiple containers are running in standard mode and need to communicate with each other.
+* <code>host</code> - Removes the network isolation completely. Any container running under a host network is basically attached to the network of the host system.
+* <code>none</code> - This driver disables networking for containers altogether. I haven't found any use-case for this yet.
+* <code>overlay</code> - This is used for connecting multiple Docker daemons across computers and is out of the scope of this book.
+* <code>macvlan</code> - Allows assignment of MAC addresses to containers, making them function like physical devices in a network.
+
+As you can see, Docker comes with a default bridge network named bridge. Any container you run will be automatically attached to this bridge network:
+```
+docker container run --rm --detach --name hello-dock --publish 8080:80 fhsinchy/hello-dock
+# a37f723dad3ae793ce40f97eb6bb236761baa92d72a2c27c24fc7fda0756657d
+
+docker network inspect --format='{{range .Containers}}{{.Name}}{{end}}' bridge
+# hello-dock
+```
+Containers attached to the default bridge network can communicate with each others using IP addresses which is **NOT RECOMMENDED AT ALL**
+
+##### HOW ABOUT USER-DEFINED BRIDGE
+A user-defined bridge, however, has some extra features over the default one. According to the official docs on this topic, some notable extra features are as follows:
+
+* __User-defined bridges provide automatic DNS resolution between containers__: This means containers attached to the same network can communicate with each others using the container name. 
+* __User-defined bridges provide better isolation__: All containers are attached to the default bridge network by default which can cause conflicts among them. Attaching containers to a user-defined bridge can ensure better isolation.
+
+* __Containers can be attached and detached from user-defined networks on the fly__: during a container’s lifetime, you can connect or disconnect it from user-defined networks on the fly. To remove a container from the default bridge network, you need to stop the container and recreate it with different network options.
+
+A network can be created using the network create command. The generic syntax for the command is as follows:
+```
+docker network create <network name>
+## Example: command to create skynet network
+docker network create skynet
+228a8a20f776a975eb1da55c2c9669ae6920bdcd8718132e139b87c28d14e651
+```
+##### ATTACHING A CREATED NETWORK TO A CONTAINER
+Two possible ways to attach a container to a network. 
+* Using the network command:
+  ```
+  docker network connect <network identifier> <container identifier>
+  ```
+  We might the inspect command to check if the network is successfully connected to our container:
+
+  ```
+  docker network inspect --format='{{range .Containers}} {{.Name}} {{end}}' skynet
+  hello-dock
+  ###
+  docker network inspect --format='{{range .Containers}} {{.Name}} {{end}}' bridge
+  hello-dock
+  ```
+* Using the <code>--network</code> option for the <code>container run</code> or <code>container create</code>
+  ```
+  --network <network identifier>
+  ```   
+  Let's run another container and attach it to skynet and ping <code>hello-dock</code> from it to see if the two can communicate
+  ```
+  docker container run --network skynet --rm --name alpine-box -it alpine sh
+  / # ping hello-dock 
+  PING hello-dock (172.19.0.2): 56 data bytes
+  64 bytes from 172.19.0.2: seq=0 ttl=64 time=0.141 ms
+  64 bytes from 172.19.0.2: seq=1 ttl=64 time=0.255 ms
+  64 bytes from 172.19.0.2: seq=2 ttl=64 time=0.234 ms
+  --- hello-dock ping statistics ---
+  3 packets transmitted, 3 packets received, 0% packet loss
+   round-trip min/avg/max = 0.141/0.210/0.255 ms
+  ```
+  As you can see, running ping hello-dock from inside the alpine-box container works because both of the containers are under the same user-defined bridge network and automatic DNS resolution is working.
+
+_**NOTE**: Keep in mind, though, that in order for the automatic DNS resolution to work you must assign custom names to the containers. Using the randomly generated name will not work._
+
+#####DETACHING A CONTAINER TO A NETWORK
+We use the <code>network disconnect</code> command for this task.
+```
+docker network disconnect <network identifier> <container identifier>
+###
+docker network disconnect skynet hello-dock
+
+```
+##### GETTING RID OF NETWORKS IN DOCKER
+Network can be removed using the <code>network rm</code> command with the syntax:
+```
+docker network rm <network identifier>
+###
+docker network rm skynet
+```
+We may use the <code>network prune</code> command to remove any unused networks from our system; this command also has the <code>-f</code> or <code>--force</code> and <code>a</code> or <code>--all</code> options.
+
+
 
 
 
