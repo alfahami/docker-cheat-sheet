@@ -251,7 +251,7 @@ Two possible ways to attach a container to a network.
 
 _**NOTE**: Keep in mind, though, that in order for the automatic DNS resolution to work you must assign custom names to the containers. Using the randomly generated name will not work._
 
-#####DETACHING A CONTAINER TO A NETWORK
+##### DETACHING A CONTAINER TO A NETWORK
 We use the <code>network disconnect</code> command for this task.
 ```
 docker network disconnect <network identifier> <container identifier>
