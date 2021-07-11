@@ -268,6 +268,73 @@ docker network rm skynet
 ```
 We may use the <code>network prune</code> command to remove any unused networks from our system; this command also has the <code>-f</code> or <code>--force</code> and <code>a</code> or <code>--all</code> options.
 
+### Containerize a Multi-Container JavaScript Application
+
+The JS project will consist of a <code>notes-api</code> powered by Express.js and PostgreSQL.
+
+The project comprise of two containers in total that will be connected using a network. Concepts about environments variables and named volumes are also discussed in this.
+
+##### RUNNING THE DATABASE POSTGRESQL
+The database of the <code>notes-api</code> is a simple PostgreSQL that uses the official <u>postgres</u> image.
+
+<blockquote>
+  According to the official docs, in order to run a container with this image, you must provide the POSTGRES_PASSWORD environment variable. Apart from this one, I'll also provide a name for the default database using the POSTGRES_DB environment variable. PostgreSQL by default listens on port 5432, so you need to publish that as well.
+</blockquote>
+
+Let's run the DB server by executing the following:
+```
+docker network create notes-api-network # creating the network
+#
+docker container run --detach --name=notes-db --env POSTGRES_DB=notesdb --env POSTGRES_PASSWORD=secret --network=notes-api-network postgres:12
+```
+The --env option for the container run and container create commands can be used for providing environment variables to a container. 
+Databases like PostgreSQL, MongoDB, and MySQL persist their data in a directory. PostgreSQL uses the /var/lib/postgresql/data directory inside the container to persist data.
+
+Now what if the container gets destroyed for some reason? You'll lose all your data. To solve this problem, a named volume can be used.
+This is where named volume come in hand.
+
+##### WORKING WITH NAMED VOLUME
+Similar to anonymous volume, except that you can refer to a named volume by using its name.
+
+generic syntax:
+```
+docker create volume <volume name>
+```
+Let's create a volume named <code>notes-db-data</code>
+```
+docker create volume notes-db-data
+notes-db-data
+#
+docker volume ls
+
+DRIVER    VOLUME NAME
+local     notes-db-data
+```
+Now let's mount this volume to the <code>/var/lib/postgresql/data</code> inside the <code>notes-db</code> container:
+
+We've got to first stop and remove the old <code>notes-db</code> container.
+```
+docker stop container notes-db
+docker rm container notes-db
+```
+Let's run a new container and assign the volume using the <code>--volume</code> option:
+```
+docker container run --detach --volume notes-db-data:/var/lib/postgresql/data --name notes-db --env POSTGRES_DB=notesdb --env POSTGRES_PASSWORD=secret --network=notes-api-network postgres:12
+```
+Let's do some inspection and see if the mounting was sucessful.
+```
+docker container inspect --format='{{range .Mounts}} {{ .Name }} {{end}}' notes-db
+ notes-db-data 
+```
+Now the data will safely be stored inside the notes-db-data volume and can be reused in the future. A bind mount can also be used instead of a named volume here, but I prefer a named volume in such scenarios.
+
+##### ACCESS LOGS FROM A CONTAINER
+Command:
+```
+docker container logs <container identifier>
+```
+
+
 
 
 
