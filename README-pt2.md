@@ -251,7 +251,7 @@ Two possible ways to attach a container to a network.
 
 _**NOTE**: Keep in mind, though, that in order for the automatic DNS resolution to work you must assign custom names to the containers. Using the randomly generated name will not work._
 
-##### DETACHING A CONTAINER TO A NETWORK
+#####DETACHING A CONTAINER TO A NETWORK
 We use the <code>network disconnect</code> command for this task.
 ```
 docker network disconnect <network identifier> <container identifier>
@@ -332,7 +332,183 @@ Now the data will safely be stored inside the notes-db-data volume and can be re
 Command:
 ```
 docker container logs <container identifier>
+#
+docker cotainer logs notes-db
 ```
+##### CREATING AND ACCESSING THE NETWORK
+Command:
+```
+docker network create notes-api-network
+#
+docker network connect notes-apu-network notes-db
+```
+##### WRITING THE DOCKERFILE
+Our Dockerfile inside the <code>notes-api</code> is set to be:
+```
+# stage one uses lts-alpine as its base and uses builder as the stage name
+FROM node:lts-alpine as builder
+
+# install dependencies for node-gyp
+RUN apk add --no-cache python make g++
+
+WORKDIR /app # setting our working directory
+
+COPY ./package.json .
+RUN npm install --only=prod 
+
+# stage two uses also lts-alpine as it base
+FROM node:lts-alpine
+
+EXPOSE 3000
+ENV NODE_ENV=production # important for the api to run properly
+
+USER node
+RUN mkdir -p /home/node/app
+WORKDIR /home/node/app
+
+COPY . .
+COPY --from=builder /app/node_modules  /home/node/app/node_modules
+
+CMD [ "node", "bin/www" ]
+```
+This is a multi-staged build. The first stage is used for building and installing the dependencies using node-gyp and the second stage is for running the application.
+
+Let's build an image from this <code>Dockerfile</code> by execting:
+```
+docker image build --tag notes-api build .
+```
+We need to inspect the database and see if it status is running:
+```
+docker inspect notes-db
+"State": {
+              "Status": "running",
+              "Running": true,
+              "Paused": false,
+              "Restarting": false,
+              "OOMKilled": false,
+              "Dead": false,
+              "Pid": 12466,
+              "ExitCode": 0,
+              "Error": "",
+              "StartedAt": "2021-07-11T16:35:28.39422633Z",
+              "FinishedAt": "2021-07-11T05:16:54.752809858Z"
+          },
+
+          "Mounts": [
+            {
+                "Type": "volume",
+                "Name": "notes-db-data",
+                "Source": "/var/lib/docker/volumes/notes-db-data/_data",
+                "Destination": "/var/lib/postgresql/data",
+                "Driver": "local",
+                "Mode": "z",
+                "RW": true,
+                "Propagation": ""
+            }
+        ],
+
+        "Networks": {
+                "notes-api-network": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": [
+                        "3cf117853c70"
+                    ],
+                    "NetworkID": "f68e7b0f1b8f3714bf57e98012328e7a319fd22c2440d6d60a63d9ac014a8eca",
+                    "EndpointID": "bcee6097053903307652fe5bad9b49450cc564ffab912d9e0d3577f0072b3e7c",
+                    "Gateway": "172.19.0.1",
+                    "IPAddress": "172.19.0.2",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "MacAddress": "02:42:ac:13:00:02",
+                    "DriverOpts": null
+                }
+```
+The notes-db container is running, uses the notes-db-data volume, and is attached to the notes-api-network bridge.
+
+Now we can run the container and start using our notes-fb application.
+```
+docker container run --detach --name=notes-api --env DB_HOST=notes-db --env DB_DATABASE=notesdb --env DB_PASSWORD=secret --publish=3000:3000 --network=notes-api-network notes-api
+b0acfa02d79aac8203d9f83cabab3d2e496a9799404392151454964466f79c72
+```
+The notes-api application requires three environment variables to be set. They are as follows:
+
+<code>DB_HOST</code> - This is the host of the database server. Given that both the database server and the API are attached to the same user-defined bridge network, the database server can be refereed to using its container name which is <code>notes-db</code> in this case.
+
+<code>DB_DATABASE</code> - The database that this API will use. On Running the Database Server we set the default database name to <code>notesdb</code> using the <code>POSTGRES_DB</code> environment variable. We'll use that here.
+
+<code>DB_PASSWORD</code> - Password for connecting to the database. This was also set on Running the Database Server sub-section using the <code>POSTGRES_PASSWORD</code> environment variable.
+
+Although the container is running, before starting using it, we have to run the database migration necessary for setting up the database tables by executing <code>npm run db:migrate</code> inside the container.
+
+##### HOW TO EXECUTE A COMMAND IN A RUNNING CONTAINER ?
+We use the <code>exec</code> command inside a running container to execute a custom command.
+Syntax:
+```
+docker container exec <container identifier> <command>
+```
+To run <code>npm run db:migrate</code> inside our container :
+```
+docker container exec notes-api npm run db:migrate
+
+
+> notes-api@ db:migrate /home/node/app
+> knex migrate:latest
+
+Using environment: production
+Batch 1 run: 1 migrations
+```
+#### Writing managements script in docker
+All the steps seen in the previous section, from networking container, creating volumes, databases ...require writing a lot of commands.
+The process can be simplified by using <u>**shell scripts**</u> and <u>**Makefile**</u>
+
+In the <code>notes-api</code> there is shell scripts as follow:
+
+* <code>boot.sh</code> - Used for starting the containers if they already exist.
+* <code>build.sh</code> - Creates and runs the containers. It also creates the images, volumes, and networks if necessary.
+<code>destroy.sh</code> - Removes all containers, volumes and networks associated with this project.
+* <code>stop.sh</code> - Stops all running containers.
+* 
+There is also a <u>Makefile</u> that contains four targets named <code>start</code>, <code>stop</code>, <code>build</code> and <code>destroy</code>, each invoking the previously mentioned shell scripts.
+
+If the container is in a running state in your system, executing <code>make stop</code> should stop all the containers. Executing <code>make destroy</code> should stop the containers and remove everything. Make sure you're running the scripts inside the <code>notes-api</code> directory:
+
+```
+make destroy
+./shutdown.sh
+stopping api container --->
+notes-api
+api container stopped --->
+
+stopping db container --->
+notes-db
+db container stopped --->
+
+shutdown script finished
+
+./destroy.sh
+removing api container --->
+notes-api
+api container removed --->
+
+removing db container --->
+notes-db
+db container removed --->
+
+removing db data volume --->
+notes-db-data
+db data volume removed --->
+
+removing network --->
+notes-api-network
+network removed --->
+
+destroy script finished
+```
+
+
 
 
 
