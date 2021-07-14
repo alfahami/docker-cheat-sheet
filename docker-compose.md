@@ -152,3 +152,86 @@ volumes:
 ```
 
 Any named volume used in any of the services has to be defined here. If we don't define a name, the volume will be named following the <code>\<project directory name>_\<volume key></code> and the key here is <code>db-data</code>.
+
+#### Starting services in docker-compose
+There is a few ways in starting services defined in a YAML file. <code>up</code> is the first command we'll learn. This command builds any missing images, creates containers and start them in one go.
+Every <code>docker-compose</code> command should be executed in the same folder as the <code>docker-compose.yaml</code>.
+
+This is how we would run docker-compose for our project:
+
+```
+docker-compose --file docker-compose.yaml up --detach
+
+## --file | -f is a must when the yaml file is not named docker-compose
+```
+The <code>start</code> command only start existing containers but doesn't create missing containers, same as <code>docker container start</code>
+
+The <code>build</code> option for the <code>up</code> forces a rebuild of the images.
+
+#### LISTING CONTAINERS IN DOCKER COMPOSE
+
+Although service containers started by Compose can be listed using the container <code>ls</code> command, there is the <code>ps</code> command for listing containers defined in the YAML only.
+
+```
+docker-compose ps
+    Name                   Command               State                Ports             
+----------------------------------------------------------------------------------------
+notes-api-dev   docker-entrypoint.sh ./nod ...   Up      0.0.0.0:3000->3000/tcp,:::3000-
+                                                         >3000/tcp                      
+notes-db-dev    docker-entrypoint.sh postgres    Up      5432/tcp  
+```
+#### EXECUTING A COMMAND INSIDE A RUNNIG SERVICE IN DOCKER COMPOSE
+
+```
+docker-compose exec <service name> commad 
+
+## example
+
+docker-compose exec api npm run db:migrate
+> notes-api@ db:migrate /home/node/app
+> knex migrate:latest
+
+Using environment: development
+Batch 1 run: 1 migrations
+```
+Unlike the container exec command, you don't need to pass the <code>-it</code> flag for interactive sessions. <code>docker-compose</code> does that automatically.
+
+#### ACCESS LOGS FROM A RUNNING SERVICE IN DOCKER COMPOSE
+
+We can also use the <code>logs</code> command to retrieve logs from a running service. The generic syntax for the command is as follows:
+
+```
+docker-compose logs <service-name>
+
+#example
+
+docker-compose logs api
+Attaching to notes-api-dev
+notes-api-dev | [nodemon] 2.0.12
+notes-api-dev | [nodemon] reading config ./nodemon.json
+notes-api-dev | [nodemon] to restart at any time, enter `rs`
+notes-api-dev | [nodemon] or send SIGHUP to 1 to restart
+notes-api-dev | [nodemon] ignoring: *.test.js
+notes-api-dev | [nodemon] watching path(s): *.*
+notes-api-dev | [nodemon] watching extensions: js,mjs,json
+notes-api-dev | [nodemon] starting `node bin/www`
+notes-api-dev | [nodemon] forking
+notes-api-dev | [nodemon] child pid: 20
+notes-api-dev | [nodemon] watching 18 files
+notes-api-dev | app running -> http://127.0.0.1:3000
+```
+This is just a portion from the log output. You can kind of hook into the output stream of the service and get the logs in real-time by using the <code>-f</code> or <code>--follow</code> option. Any later log will show up instantly in the terminal as long as you don't exit by pressing <code>ctrl + c</code> or closing the window. The container will keep running even if you exit out of the log window.
+
+#### STOPPING A SERVICE IN DOCKER COMPOSE
+Two approaches to be taken, the first one is the <code>down</code>. The <code>down</code> command stops all running containers and removes them from the system. It also removes any network.
+```
+docker-compose down --volumes ## Removing all named volumes
+
+Stopping notes-db-dev  ... done
+Stopping notes-api-dev ... done
+Removing notes-db-dev  ... done
+Removing notes-api-dev ... done
+Removing network notes-api_default
+Removing volume notes-db-dev-data
+``` 
+The <code>stop</stop> command can also be used to stop all the containers for the application and keep them which can later be started by the <code>start</code> command.
