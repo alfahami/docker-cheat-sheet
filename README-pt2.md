@@ -470,7 +470,7 @@ In the <code>notes-api</code> there is shell scripts as follow:
 * <code>build.sh</code> - Creates and runs the containers. It also creates the images, volumes, and networks if necessary.
 <code>destroy.sh</code> - Removes all containers, volumes and networks associated with this project.
 * <code>stop.sh</code> - Stops all running containers.
-* 
+
 There is also a <u>Makefile</u> that contains four targets named <code>start</code>, <code>stop</code>, <code>build</code> and <code>destroy</code>, each invoking the previously mentioned shell scripts.
 
 If the container is in a running state in your system, executing <code>make stop</code> should stop all the containers. Executing <code>make destroy</code> should stop the containers and remove everything. Make sure you're running the scripts inside the <code>notes-api</code> directory:
