@@ -234,4 +234,4 @@ Removing notes-api-dev ... done
 Removing network notes-api_default
 Removing volume notes-db-dev-data
 ``` 
-The <code>stop</stop> command can also be used to stop all the containers for the application and keep them which can later be started by the <code>start</code> command.
+The <code>stop</code> command can also be used to stop all the containers for the application and keep them which can later be started by the <code>start</code> command.
