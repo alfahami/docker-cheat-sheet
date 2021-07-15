@@ -234,4 +234,43 @@ Removing notes-api-dev ... done
 Removing network notes-api_default
 Removing volume notes-db-dev-data
 ``` 
-The <code>stop</code> command can also be used to stop all the containers for the application and keep them which can later be started by the <code>start</code> command.
+### COMPOSE A FULL STACK APPLICATION IN DOCKER COMPOSE
+We'll be adding a front-end to our previous notes api application. 
+Let's have a look on how the application will work:
+![alt fs-diagram](images/fullstack-application-design.svg)
+
+Instead of accepting requests directly,all the requests will be first received by an NGINX (lets call it router) service.
+
+The router will then see if the requested end-point has <code>/api</code> in it. If yes, the router will route the request to the back-end or if not, the router will route the request to the front-end.
+
+When we run a front-end application it doesn't run inside a container. It runs on the browser, served from a container. As a result, Compose networking doesn't work as expected and the front-end application fails to find the api service.
+
+NGINX, on the other hand, runs inside a container and can communicate with the different services across the entire application.
+
+We can check out the <code>/notes-api/nginx/development.conf</code> and <code>/notes-api/nginx/production.conf</code> for <code>nginx</code> files. Code for the <code>/notes-api/nginx/Dockerfile.dev</code> is as follows. 
+```
+FROM nginx:stable-alpine
+COPY ./development.conf /etc/nginx/conf.d/default.conf
+```
+All it does is copy the configuration file to <code>/etc/nginx/conf.d/default.conf</code> inside the container.
+
+Let's start writing the <code>docker-compose.yaml</code> file. Apart from the <code>api</code> and <code>db</code> services there will be the <code>client</code> and <code>nginx</code> services. There will also be some network definitions that we'll get into shortly.
+
+The only thing that needs some explanation is the network configuration. The code for the networks block is as follows:
+```
+networks: 
+    frontend:
+        name: fullstack-notes-application-network-frontend
+        driver: bridge
+    backend:
+        name: fullstack-notes-application-network-backend
+        driver: bridge
+```
+We have two bridge networks. By default, Compose creates a bridge network and attaches all containers to that. In this project, however, we wanted proper network isolation. So we defined two networks, one for the front-end services and one for the back-end  services.
+
+We've also added networks block in each of the service definitions. This way the the <code>api</code> and <code>db</code> service will be attached to one network and the client service will be attached to a separate network. But the <code>nginx</code> service will be attached to both the networks so that it can perform as router between the front-end and back-end services.
+Finally, we can start all the services by executing the following command:
+
+```
+docker-compose up --detach
+```
