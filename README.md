@@ -2,7 +2,7 @@
 In this cheat sheet, I'll be using <code>apache</code> image and <code>php</code>.
 At the end we'll build a **_multi-staged_** php mvc news app with Docker.
 
-#### BASICS COMMANDS
+#### <u>BASICS COMMANDS</u>
 * Container's ID
 
 The CONTAINER ID is the first 12 characters of the full container ID printed out after running <code>docker container run</code>.\
