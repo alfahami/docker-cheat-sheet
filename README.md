@@ -73,6 +73,13 @@ docker container prune
 ```
 docker container ps | ls
 ```
+* Remove unused data
+```
+docker system prune
+```
+
+Remove all unused containers, networks, images (both dangling and unreferenced), and optionally, volumes.
+
 * Listing running and stopped containers
 ```
 docker container ps -a | --all | ls -a | ls --all
@@ -105,4 +112,21 @@ Return low-level information on Docker Objects. It provides detailed information
 ```
 docker inspect [OPTIONS] NAME[ID] [NAME | ID ...]
 ```
+#### IMANGE MANIPULATIONS
+
+According to the [officail docs](https://docs.docker.com/engine/reference/builder/)
+<blockquote>
+Docker can build images automatically by reading the instructions from a Dockerfile. A Dockerfile is a text document that contains all the commands a user could call on the command line to assemble an image. Using docker build users can create an automated build that executes several command-line instructions in succession.
+</blockquote>
+
+* Creating images
+```
+# Make sure we're in the same folder as the Dockerfile 
+
+docker image buld -t <image-name> build . 
+
+# <image-name> will be used to run the built image.
+# . indicate the build to be run from the current directory where Dockerfile exists.
+```
+* Dockerfile
 
