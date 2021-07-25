@@ -128,6 +128,9 @@ docker image buld -t <image-name> build .
 # <image-name> will be used to run the built image.
 # . indicate the build to be run from the current directory where Dockerfile exists.
 ```
+* Our image should have httpd pre-installed 
+* The image should start apache server upon running
+
 * Dockerfile
 ```
 #base image 
@@ -143,5 +146,39 @@ EXPOSE 80
 
 # running apache in foreground
 CMD ["apache2ctl", "-D", "FOREGROUND"] 
+```
+* Tagging an image (assigning a custom identifier to our image)
+```
+docker image build -t (--tag) <image-repository>:<image tag name> <path>
+
+# example
+
+docker image build --tag custom-apache:packaged httpd:packaged .
+```
+
+* Changing the tag of an already tagged built image
+```
+docker image tag <image id> <image repository>:<image tag>
+
+## or ##
+
+docker image tag <image repository>:<image tag> <new image repository>:<new image tag
+```
+* Listing and removing docker images
+```
+# listing all available images
+docker image ls
+
+# removing one given image
+docker image rm <image identifier or image name>
+
+#removing all existing images
+docker image prune | --force (-f) | --all (-a)
+```
+
+* Show the history of an image
+
+```
+docker image history [OPTIONS: --human (-H) | --format | --no-trunc | --quiet (-q)] image
 ```
 
